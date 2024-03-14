@@ -133,10 +133,8 @@ async def set_skip_number(bot, message):
     else:
         await message.reply("Give me a skip number")
         
-# Assuming `temp` is intended to be a class and `CURRENT` is a class attribute
-class temp:
-    CURRENT = ... # Define the appropriate value for CURRENT here
-
+# Assuming `temp.CURRENT` should represent the current message ID and it's an integer
+temp.CURRENT = 0  # Initialize with an appropriate value
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
     total_files = 0
@@ -147,14 +145,14 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
     unsupported = 0
     async with lock:
         try:
+            # Initialize `current` with the value of `temp.CURRENT`
             current = temp.CURRENT
             temp.CANCEL = False
-            async for message in bot.iter_messages(chat, lst_msg_id, 0):  # Assuming the current message ID should start from 0
-         #   async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
+            async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                 if temp.CANCEL:
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
                     break
-                current += 1
+                current += 1  # Increment `current` by 1
                 if current % 20 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
@@ -187,4 +185,5 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
             logger.exception(e)
             await msg.edit(f'Error: {e}')
         else:
-            await msg.edit(f'Succesfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
+            await msg.edit(f'Successfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
+
