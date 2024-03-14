@@ -32,7 +32,7 @@ async def send_for_index(bot, message):
     if lock.locked():
         return await message.reply('Wait until previous process complete.')
     i = await message.reply("Forward last message or send last message link.")
-    msg = await bot.get_messages(chat_id=message.chat.id, user_id=message.from_user.id)
+    msg = await bot.get_history(chat_id=message.chat.id, user_id=message.from_user.id)
     await i.delete()
     if msg.text and msg.text.startswith("https://t.me"):
         try:
