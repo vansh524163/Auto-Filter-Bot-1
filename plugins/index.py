@@ -132,6 +132,10 @@ async def set_skip_number(bot, message):
         temp.CURRENT = int(skip)
     else:
         await message.reply("Give me a skip number")
+        
+# Assuming `temp` is intended to be a class and `CURRENT` is a class attribute
+class temp:
+    CURRENT = ... # Define the appropriate value for CURRENT here
 
 
 async def index_files_to_db(lst_msg_id, chat, msg, bot):
