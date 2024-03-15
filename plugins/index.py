@@ -145,14 +145,13 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
     unsupported = 0
     async with lock:
         try:
-            # Initialize `current` with the value of `temp.CURRENT`
             current = temp.CURRENT
             temp.CANCEL = False
             async for message in bot.iter_messages(chat, lst_msg_id, temp.CURRENT):
                 if temp.CANCEL:
                     await msg.edit(f"Successfully Cancelled!!\n\nSaved <code>{total_files}</code> files to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>")
                     break
-                current += 1  # Increment `current` by 1
+                current += 1
                 if current % 20 == 0:
                     can = [[InlineKeyboardButton('Cancel', callback_data='index_cancel')]]
                     reply = InlineKeyboardMarkup(can)
@@ -174,16 +173,17 @@ async def index_files_to_db(lst_msg_id, chat, msg, bot):
                     continue
                 media.file_type = message.media.value
                 media.caption = message.caption
-                aynav, vnay = await save_file(media)
-                if aynav:
+                result = await save_file(media)  # Store the result of save_file
+                if result == True:  # Assuming the first return value indicates success
                     total_files += 1
-                elif vnay == 0:
+                elif result == False:  # Assuming the second return value indicates duplicate
                     duplicate += 1
-                elif vnay == 2:
+                else:  # Assuming the third return value indicates an error
                     errors += 1
         except Exception as e:
             logger.exception(e)
             await msg.edit(f'Error: {e}')
         else:
             await msg.edit(f'Successfully saved <code>{total_files}</code> to dataBase!\nDuplicate Files Skipped: <code>{duplicate}</code>\nDeleted Messages Skipped: <code>{deleted}</code>\nNon-Media messages skipped: <code>{no_media + unsupported}</code>(Unsupported Media - `{unsupported}` )\nErrors Occurred: <code>{errors}</code>')
+
 
