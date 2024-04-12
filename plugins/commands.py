@@ -236,16 +236,25 @@ async def channels_info(bot, message):
     text += f'\n**Total:** {len(ids)}'
     await message.reply(text)
 
-@Client.on_message(filters.command('stats') & filters.user(ADMINS))
-async def stats(bot, message):
-    msg = await message.reply('Please Wait...')
-    files = await Media.count_documents()
-    users = await db.total_users_count()
-    chats = await db.total_chat_count()
-    u_size = get_size(await db.get_db_size())
-    f_size = get_size(536870912 - await db.get_db_size())
-    uptime = get_readable_time(time.time() - temp.START_TIME)
-    await msg.edit(script.STATUS_TXT.format(files, users, chats, u_size, f_size, uptime))    
+@Client.on_message(filters.command('stats') & filters.incoming)
+async def get_ststs(bot, message):
+    rju = await message.reply('Fetching stats..')
+    #users and chats
+    total_users = await db.total_users_count()
+    totl_chats = await db.total_chat_count()
+    #primary db
+    filesp = await Media.count_documents()
+    #secondary db
+    totalsec = await Media2.count_documents()
+    #primary
+    stats = await clientDB.command('dbStats')
+    used_dbSize = (stats['dataSize']/(1024*1024))+(stats['indexSize']/(1024*1024))
+    free_dbSize = 512-used_dbSize
+    #secondary
+    stats2 = await clientDB2.command('dbStats')
+    used_dbSize2 = (stats2['dataSize']/(1024*1024))+(stats2['indexSize']/(1024*1024))
+    free_dbSize2 = 512-used_dbSize2
+    await rju.edit(script.STATUS_TXT.format((int(filesp)+int(totalsec)), total_users, totl_chats, filesp, round(used_dbSize, 2), round(free_dbSize, 2), totalsec, round(used_dbSize2, 2), round(free_dbSize2, 2)))
     
 @Client.on_message(filters.command('settings'))
 async def settings(client, message):
